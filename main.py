@@ -168,8 +168,8 @@ with open("info.txt", 'a', encoding='utf-8') as f:
 if not msg:
     pass
 else:
-    with open("message.txt", 'w')as f:
-        f.write(msg)
+    # with open("message.txt", 'w')as f:
+        # f.write(msg)
     receive_begin, receive_end = msg.find("<"), msg.find(">")
     Subject_begin = msg.find("Subject: ")
 
