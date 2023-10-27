@@ -186,6 +186,9 @@ else:
     if "?gb18030?B?" in Subject_main or "?GB2312" in Subject_main:
         # print(decode_header(Subject_main)[0][0])
         Subject_main = decode_header(Subject_main)[0][0].decode("GBK")
+    if "UTF-8" in Subject_main:
+        # print(decode_header(Subject_main)[0][0])
+        Subject_main = decode_header(Subject_main)[0][0].decode("UTF-8")
 
     print(receive_main)
     print(Subject_main)
