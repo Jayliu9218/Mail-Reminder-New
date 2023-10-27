@@ -5,6 +5,8 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  schedule:
+    - cron: '30 0-23 * * *'
 
 permissions: write-all
 
@@ -26,17 +28,23 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: tree
+      run: |
+        tree
+
     - name: Run main
       run: |
-        git clone https://github.com/Jayliu9218/Mail-Reminder-New.git
-        cd Mail-Reminder-New
+        git pull
+        cat info.txt
         python main.py
+        cat info.txt
     
     - name: Commit files
       run: |
+        git init
         git config --local user.email "l921832312@qq.com"
         git config --local user.name "Jayliu9218"
-        git ls
+        ls
         git add info.txt
         git commit -m "AUTO"
     - name: Push changes
