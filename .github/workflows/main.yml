@@ -1,0 +1,32 @@
+name: main
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0-14/1,22,23 * * *'
+  push: 
+
+env:
+  ACTION_MAIL: "l921832312@qq.com"
+  ACTION_NAME: "Jayliu9218"
+  ACTION_BRANCH: "master"
+  ACTION_MESSAGE: "auto"
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: run main
+        shell: cmd
+        run: |
+          git clone https://github.com/Jayliu9218/Mail-Reminder
+          cd Mail-Reminder
+          .\main
+          dir
+          
+          git config --global user.email "l921832312@qq.com"
+          git config --global user.name "Jayliu9218"
+          git add .
+          git commit -m "auto"
+          git push --force
