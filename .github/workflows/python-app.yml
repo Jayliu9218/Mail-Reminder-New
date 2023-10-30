@@ -1,10 +1,7 @@
 name: Python application
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_dispatch:
   schedule:
     - cron: '30 0-23 * * *'
 
@@ -17,16 +14,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python-version: '3.9'
+        cache: 'pip' # caching pip dependencies
+    - run: pip install -r requirements.txt
 
     - name: tree
       run: |
@@ -47,6 +39,7 @@ jobs:
         ls
         git add info.txt
         git commit -m "AUTO"
+        
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
