@@ -7,9 +7,31 @@ from email.utils import parseaddr
 from email.mime.text import MIMEText
 from email.header import Header
 import os
+import sys
 
-MyKey_decrypt = os.environ['GITHUB_TOKEN']
-MyKey_encrypt = os.environ['GITHUB_TOKEN']
+try:
+    print(os.environ['GITHUB_TOKEN'])
+    GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+except KeyError:
+    print('Please define the environment variable GITHUB_TOKEN')
+    sys.exit(1)
+
+MyKey_decrypt = GITHUB_TOKEN
+MyKey_encrypt = GITHUB_TOKEN
+
+
+def encrypt(key_decrypt):
+    key_encrypt = ""
+    for i, j in zip(key_decrypt, MyKey_encrypt):
+        key_encrypt = key_encrypt + str(ord(i) + ord(j)) + " "
+    return key_encrypt
+
+
+def decrypt(key_encrypt):
+    key_decrypt = ""
+    for i, j in zip(key_encrypt.split(" ")[:-1], MyKey_decrypt):
+        key_decrypt = key_decrypt + chr(int(i) - ord(j))
+    return key_decrypt
 
 
 def parser_address(msg):
@@ -28,21 +50,7 @@ def parser_subject(msg):
     return format(value)
 
 
-def encrypt(key_decrypt):
-    key_encrypt = ""
-    for i, j in zip(key_decrypt, MyKey_encrypt):
-        key_encrypt = key_encrypt + str(ord(i) + ord(j)) + "_"
-    return key_encrypt
-
-
-def decrypt(key_encrypt):
-    key_decrypt = ""
-    for i, j in zip(key_encrypt.split("_")[:-1], MyKey_decrypt):
-        key_decrypt = key_decrypt + chr(int(i) - ord(j))
-    return key_decrypt
-
-
-def mail_deliver(user ,Subject_main, Content_main):
+def mail_deliver(user, Subject_main, Content_main):
     message = MIMEText(Content_main, 'plain', 'utf-8')
     message['From'] = Header(user.account)
     message['To'] = Header(user.receiver, 'utf-8')
@@ -104,6 +112,11 @@ class user:
         self.receiver = receiver
 
 
+print("* " * 11)
+print("*   Start running!  *")
+print("* " * 11)
+
+
 def get_config():
     with open("config.txt", 'r', encoding='utf-8') as f:
         f_content = f.readlines()
@@ -132,10 +145,8 @@ def get_config():
     return NEW_user, encrypted_or_not
 
 
-print("* " * 11)
-print("*   Start running!  *")
-print("* " * 11)
 NEW_user, encrypted = get_config()
+
 try:
     with open("info.txt", 'r', encoding='utf-8') as f:
         info_content = f.readlines()
@@ -173,7 +184,7 @@ if not msg:
 else:
     # with open("message.txt", 'w')as f:
     # f.write(format(msg))
-    mail_deliver(NEW_user, parser_subject(msg),parser_address(msg))
+    mail_deliver(NEW_user, parser_subject(msg), parser_address(msg))
 
 with open("config.txt", 'r', encoding='utf-8') as f:
     f_content = f.readlines()
