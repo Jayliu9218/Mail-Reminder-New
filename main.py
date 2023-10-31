@@ -1,30 +1,48 @@
 import poplib
+import smtplib
 import time
 from email.parser import Parser
 from email.header import decode_header
-import smtplib
+from email.utils import parseaddr
 from email.mime.text import MIMEText
 from email.header import Header
+import os
 
-MyKey = "897vsU*(^(&TGSDF&(ASU_HANDS(AHNSFIOAJSF)A*)_WQJMJAPSOSad987syhy)(&^&%*d"
+MyKey_decrypt = os.environ['GITHUB_TOKEN']
+MyKey_encrypt = os.environ['GITHUB_TOKEN']
+
+
+def parser_address(msg):
+    hdr, addr = parseaddr(msg['From'])
+    name, charset = decode_header(hdr)[0]
+    if charset:
+        name = name.decode(charset)
+    return format(name) + '\n\n' + format(addr) + '\n\n' + 'Check your mailbox'
+
+
+def parser_subject(msg):
+    subject = msg['Subject']
+    value, charset = decode_header(subject)[0]
+    if charset:
+        value = value.decode(charset)
+    return format(value)
 
 
 def encrypt(key_decrypt):
     key_encrypt = ""
-    for i, j in zip(key_decrypt, MyKey):
+    for i, j in zip(key_decrypt, MyKey_encrypt):
         key_encrypt = key_encrypt + str(ord(i) + ord(j)) + " "
     return key_encrypt
 
 
 def decrypt(key_encrypt):
-    key_dencrypt = ""
-    for i, j in zip(key_encrypt.split(" ")[:-1], MyKey):
-        key_dencrypt = key_dencrypt + chr(int(i) - ord(j))
-    return key_dencrypt
+    key_decrypt = ""
+    for i, j in zip(key_encrypt.split(" ")[:-1], MyKey_decrypt):
+        key_decrypt = key_decrypt + chr(int(i) - ord(j))
+    return key_decrypt
 
 
-def mail_deliver(user, Subject_main):
-    Content_main = ""
+def mail_deliver(user ,Subject_main, Content_main):
     message = MIMEText(Content_main, 'plain', 'utf-8')
     message['From'] = Header(user.account)
     message['To'] = Header(user.receiver, 'utf-8')
@@ -37,25 +55,17 @@ def mail_deliver(user, Subject_main):
         print("Deliver successfully!\nCheck your mailbox.")
         return True
     except smtplib.SMTPException:
-        print("Nothing happened.\nNo mail is delivered.")
+        print("Deliver failed!\nCheck the code.")
         return False
 
 
-def get_mail_content(user, last_len):
-    # 开始连接到服务器
+def get_msg(user, last_len):
     server = poplib.POP3(user.pop3_server)
-
-    # 打开或者关闭调试信息，为打开，会在控制台打印客户端与服务器的交互信息
     # server.set_debuglevel(1)
-
-    # 打印POP3服务器的欢迎文字，验证是否正确连接到了邮件服务器
     # print(server.getwelcome().decode('GBK'))
-
-    # 开始进行身份验证
     server.user(user.account)
     server.pass_(user.password)
 
-    # 返回邮件总数目和占用服务器的空间大小（字节数）， 通过stat()方法即可
     email_num, email_size = server.stat()
     # print("Total number of emails: {0}, Total scale of emails: {1}".format(email_num, email_size))
 
@@ -66,21 +76,15 @@ def get_mail_content(user, last_len):
     print('The number of messages at this access: {}'.format(len(msg_list)))
 
     if last_len < len(msg_list):
-        # 下面单纯获取最新的一封邮件
         total_mail_numbers = len(msg_list)
 
         rsp, msglines, msgsiz = server.retr(total_mail_numbers)
         # print("服务器的响应: {0},\n原始邮件内容： {1},\n该封邮件所占字节大小： {2}".format(rsp, msglines, msgsiz))
 
-        msg_content = b'\r\n'.join(msglines).decode('gb18030','ignore')
+        msg_content = b'\r\n'.join(msglines).decode('gb18030', 'ignore')
         msg = Parser().parsestr(text=msg_content)
-        # print('解码后的邮件信息:\n{}'.format(msg))
-
-        # 关闭与服务器的连接，释放资源
         server.close()
-
-        # return msg
-        return format(msg), len(msg_list)
+        return msg, len(msg_list)
 
     else:
         server.close()
@@ -100,7 +104,7 @@ class user:
         self.receiver = receiver
 
 
-def get_user_info():
+def get_config():
     with open("config.txt", 'r', encoding='utf-8') as f:
         f_content = f.readlines()
         encrypted_or_not = int(f_content[4][0])
@@ -124,14 +128,14 @@ def get_user_info():
     pop3_server = f_content[2][5:-1]
     receiver = f_content[3][9:-1]
 
-    NEW_USER = user(account=account, password=password, pop3_server=pop3_server, receiver=receiver)
-    return NEW_USER, encrypted_or_not
+    NEW_user = user(account=account, password=password, pop3_server=pop3_server, receiver=receiver)
+    return NEW_user, encrypted_or_not
 
 
 print("* " * 11)
 print("*   Start running!  *")
 print("* " * 11)
-NEW_USER, encrypted = get_user_info()
+NEW_user, encrypted = get_config()
 try:
     with open("info.txt", 'r', encoding='utf-8') as f:
         info_content = f.readlines()
@@ -141,7 +145,7 @@ try:
             last_len = int(info_content[info_lines - 1][29:])
             print("Complete checking of info.txt!")
         else:  # 初始化info.txt
-            _msg, last_len = get_mail_content(NEW_USER, 0)
+            _msg, last_len = get_msg(NEW_user, 0)
             with open("info.txt", 'w', encoding='utf-8') as f:
                 NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 f.write(NowTime + ' last_len:' + str(last_len) + '\n')
@@ -150,50 +154,26 @@ try:
 except:
     with open("info.txt", 'w', encoding='utf-8') as f:
         pass
-    _msg, last_len = get_mail_content(NEW_USER, 0)
+    _msg, last_len = get_msg(NEW_user, 0)
     with open("info.txt", 'w', encoding='utf-8') as f:
         NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         f.write(NowTime + ' last_len:' + str(last_len) + '\n')
     print("Complete initialization of info.txt!")
     quit()
 
-
 print("The number of messages at last access: " + str(last_len))
-msg, this_len = get_mail_content(NEW_USER, last_len)
+msg, this_len = get_msg(NEW_user, last_len)
 
 with open("info.txt", 'a', encoding='utf-8') as f:
     NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     f.write(NowTime + ' last_len:' + str(this_len) + '\n')
 
 if not msg:
-    pass
+    print("Nothing happened.\nNo mail is delivered.")
 else:
     # with open("message.txt", 'w')as f:
-        # f.write(msg)
-    receive_begin, receive_end = msg.find("<"), msg.find(">")
-    Subject_begin = msg.find("Subject: ")
-
-    if msg.find("MIME") + 1:
-        Subject_end = msg.find("MIME") - 1
-        if msg.find("Mime") + 1:
-            Subject_end = min(msg.find("MIME"), msg.find("Mime"))
-    else:
-        Subject_end = msg.find("Mime")
-
-    receive_main = msg[receive_begin + len("<"): receive_end]
-    Subject_main = msg[Subject_begin + len("Subject: "):Subject_end]
-
-    if "?gb18030?B?" in Subject_main or "?GB2312" in Subject_main:
-        # print(decode_header(Subject_main)[0][0])
-        Subject_main = decode_header(Subject_main)[0][0].decode("GBK")
-    if "UTF-8" in Subject_main:
-        # print(decode_header(Subject_main)[0][0])
-        Subject_main = decode_header(Subject_main)[0][0].decode("UTF-8")
-
-    print(receive_main)
-    print(Subject_main)
-    print("Start delivering the email...")
-    mail_deliver(NEW_USER, Subject_main)
+    # f.write(format(msg))
+    mail_deliver(NEW_user, parser_subject(msg),parser_address(msg))
 
 with open("config.txt", 'r', encoding='utf-8') as f:
     f_content = f.readlines()
