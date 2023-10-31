@@ -20,14 +20,14 @@ MyKey_decrypt = GITHUB_TOKEN
 MyKey_encrypt = GITHUB_TOKEN
 
 
-def encrypt(key_decrypt):
+def encrypt(key_decrypt,MyKey_encrypt):
     key_encrypt = ""
     for i, j in zip(key_decrypt, MyKey_encrypt):
         key_encrypt = key_encrypt + str(ord(i) + ord(j)) + " "
     return key_encrypt
 
 
-def decrypt(key_encrypt):
+def decrypt(key_encrypt,MyKey_decrypt):
     key_decrypt = ""
     for i, j in zip(key_encrypt.split(" ")[:-1], MyKey_decrypt):
         key_decrypt = key_decrypt + chr(int(i) - ord(j))
@@ -127,7 +127,7 @@ def get_config():
             f_content = f.readlines()
         temp = ""
         for line in f_content:
-            temp = temp + decrypt(line)
+            temp = temp + decrypt(line,MyKey_decrypt)
         with open("config.txt", 'w', encoding='utf-8') as f:
             f.write(temp)
 
@@ -190,7 +190,7 @@ with open("config.txt", 'r', encoding='utf-8') as f:
     f_content = f.readlines()
 temp = ""
 for line in f_content:
-    temp = temp + encrypt(line) + '\n'
+    temp = temp + encrypt(line,MyKey_encrypt) + '\n'
 with open("config.txt", 'w', encoding='utf-8') as f:
     f.write(temp)
 
