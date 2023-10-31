@@ -32,7 +32,7 @@ def decrypt(key_encrypt,MyKey_decrypt):
     key_decrypt = ""
     for i, j in zip(key_encrypt.split(" ")[:-1], MyKey_decrypt):
         key_decrypt = key_decrypt + chr(int(i) - ord(j))
-        print(j)
+        print(j,end="")
     return key_decrypt
 
 
