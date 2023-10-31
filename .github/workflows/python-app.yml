@@ -31,9 +31,9 @@ jobs:
     - name: Run main
       run: |
         git pull
-        cat info.txt
+        cat config.txt
         python main.py
-        cat info.txt
+        cat config.txt
     
     - name: Commit files
       run: |

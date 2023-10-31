@@ -31,13 +31,13 @@ def parser_subject(msg):
 def encrypt(key_decrypt):
     key_encrypt = ""
     for i, j in zip(key_decrypt, MyKey_encrypt):
-        key_encrypt = key_encrypt + str(ord(i) + ord(j)) + " "
+        key_encrypt = key_encrypt + str(ord(i) + ord(j)) + "_"
     return key_encrypt
 
 
 def decrypt(key_encrypt):
     key_decrypt = ""
-    for i, j in zip(key_encrypt.split(" ")[:-1], MyKey_decrypt):
+    for i, j in zip(key_encrypt.split("_")[:-1], MyKey_decrypt):
         key_decrypt = key_decrypt + chr(int(i) - ord(j))
     return key_decrypt
 
