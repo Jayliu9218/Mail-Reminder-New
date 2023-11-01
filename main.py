@@ -10,7 +10,6 @@ import os
 import sys
 
 try:
-    print(os.environ['GITHUB_TOKEN'])
     GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
 except KeyError:
     print('Please define the environment variable GITHUB_TOKEN')
@@ -19,20 +18,18 @@ except KeyError:
 MyKey_decrypt = GITHUB_TOKEN
 MyKey_encrypt = GITHUB_TOKEN
 
-print(MyKey_decrypt)
 
-def encrypt(key_decrypt,MyKey_encrypt):
+def encrypt(key_decrypt, MyKey_encrypt):
     key_encrypt = ""
     for i, j in zip(key_decrypt, MyKey_encrypt):
         key_encrypt = key_encrypt + str(ord(i) + ord(j)) + " "
     return key_encrypt
 
 
-def decrypt(key_encrypt,MyKey_decrypt):
+def decrypt(key_encrypt, MyKey_decrypt):
     key_decrypt = ""
     for i, j in zip(key_encrypt.split(" ")[:-1], MyKey_decrypt):
         key_decrypt = key_decrypt + chr(int(i) - ord(j))
-        print(j,end="")
     return key_decrypt
 
 
@@ -121,30 +118,25 @@ print("* " * 11)
 
 def get_config():
     with open("config.txt", 'r', encoding='utf-8') as f:
-        f_content = f.readlines()
-        encrypted_or_not = int(f_content[4][0])
+        f_content = eval(f.readlines()[0])
+        encrypted = f_content['encrypted']
 
-    if encrypted_or_not:
-        with open("config.txt", 'r', encoding='utf-8') as f:
-            f_content = f.readlines()
-        temp = ""
-        for line in f_content:
-            temp = temp + decrypt(line,MyKey_decrypt)
-        with open("config.txt", 'w', encoding='utf-8') as f:
-            f.write(temp)
-
-    with open("config.txt", 'r', encoding='utf-8') as f:
-        f_content = f.readlines()
-    print("Original SJTU email address: " + f_content[0][8:-1])
-    print("SJTU email server address: " + f_content[2][5:-1])
-    print("Transfer to: " + f_content[3][9:-1])
-    account = f_content[0][8:-1]
-    password = f_content[1][9:-1]
-    pop3_server = f_content[2][5:-1]
-    receiver = f_content[3][9:-1]
+    if encrypted:
+        account = decrypt(f_content['account'], MyKey_decrypt)
+        password = decrypt(f_content['password'], MyKey_decrypt)
+        pop3_server = decrypt(f_content['pop3_server'], MyKey_decrypt)
+        receiver = decrypt(f_content['receiver'], MyKey_decrypt)
+    else:
+        account = f_content['account']
+        password = f_content['password']
+        pop3_server = f_content['pop3_server']
+        receiver = f_content['receiver']
+    print("Original SJTU email address: " + account)
+    print("SJTU email server address: " + pop3_server)
+    print("Transfer to: " + receiver)
 
     NEW_user = user(account=account, password=password, pop3_server=pop3_server, receiver=receiver)
-    return NEW_user, encrypted_or_not
+    return NEW_user, encrypted
 
 
 NEW_user, encrypted = get_config()
@@ -188,13 +180,14 @@ else:
     # f.write(format(msg))
     mail_deliver(NEW_user, parser_subject(msg), parser_address(msg))
 
-with open("config.txt", 'r', encoding='utf-8') as f:
-    f_content = f.readlines()
-temp = ""
-for line in f_content:
-    temp = temp + encrypt(line,MyKey_encrypt) + '\n'
-with open("config.txt", 'w', encoding='utf-8') as f:
-    f.write(temp)
+if not encrypted:
+    f_content = {'account': encrypt(NEW_user.account, MyKey_encrypt),
+                 'password': encrypt(NEW_user.password, MyKey_encrypt),
+                 'pop3_server': encrypt(NEW_user.pop3_server, MyKey_encrypt),
+                 'receiver': encrypt(NEW_user.receiver, MyKey_encrypt),
+                 'encrypted': 1}
+    with open('config.txt','w',encoding='utf-8')as f:
+        f.write(str(f_content))
 
 print("* " * 11)
 print("*    End running!   *")
