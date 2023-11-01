@@ -9,14 +9,16 @@ from email.header import Header
 import os
 import sys
 
+global last_len
+
 try:
-    GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+    SUPER_TOKEN = os.environ['SUPER_TOKEN']
 except KeyError:
-    print('Please define the environment variable GITHUB_TOKEN')
+    print('Please define the environment variable SUPER_TOKEN')
     sys.exit(1)
 
-MyKey_decrypt = GITHUB_TOKEN
-MyKey_encrypt = GITHUB_TOKEN
+MyKey_decrypt = SUPER_TOKEN
+MyKey_encrypt = SUPER_TOKEN
 
 
 def encrypt(key_decrypt, MyKey_encrypt):
@@ -55,11 +57,15 @@ def mail_deliver(user, Subject_main, Content_main):
     message['To'] = Header(user.receiver, 'utf-8')
     message['Subject'] = Header(Subject_main, 'utf-8')
     try:
-        smtpObj = smtplib.SMTP()
+        smtpObj = smtplib.SMTP(user.pop3_server)
         smtpObj.connect(user.pop3_server, 25)  # 25 为 SMTP 端口号
         smtpObj.login(user.account, user.password)
         smtpObj.sendmail(user.account, user.receiver, message.as_string())
+        smtpObj.quit()
         print("Deliver successfully!\nCheck your mailbox.")
+        with open("info.txt", 'a', encoding='utf-8') as f:
+            NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            f.write(NowTime + ' last_len:' + str(this_len) + '\n')
         return True
     except smtplib.SMTPException:
         print("Deliver failed!\nCheck the code.")
@@ -131,9 +137,9 @@ def get_config():
         password = f_content['password']
         pop3_server = f_content['pop3_server']
         receiver = f_content['receiver']
-    print("Original SJTU email address: " + account)
-    print("SJTU email server address: " + pop3_server)
-    print("Transfer to: " + receiver)
+    print("Original SJTU email address:" + account)
+    print("SJTU email server address:" + pop3_server)
+    print("Transfer to:" + receiver)
 
     NEW_user = user(account=account, password=password, pop3_server=pop3_server, receiver=receiver)
     return NEW_user, encrypted
@@ -169,15 +175,13 @@ except:
 print("The number of messages at last access: " + str(last_len))
 msg, this_len = get_msg(NEW_user, last_len)
 
-with open("info.txt", 'a', encoding='utf-8') as f:
-    NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    f.write(NowTime + ' last_len:' + str(this_len) + '\n')
 
 if not msg:
     print("Nothing happened.\nNo mail is delivered.")
 else:
     # with open("message.txt", 'w')as f:
     # f.write(format(msg))
+    print("Start delivering the mail...")
     mail_deliver(NEW_user, parser_subject(msg), parser_address(msg))
 
 if not encrypted:

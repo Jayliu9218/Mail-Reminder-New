@@ -9,7 +9,7 @@ on:
 permissions: write-all
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SUPER_TOKEN: ${{ secrets.SUPER_TOKEN }}
 
 jobs:
   build:
