@@ -42,7 +42,7 @@ jobs:
         git config --local user.email "l921832312@qq.com"
         git config --local user.name "Jayliu9218"
         ls
-        git add info.txt
+        git add info.txt config.txt
         git commit -m "AUTO"
         
     - name: Push changes
