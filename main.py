@@ -11,16 +11,6 @@ import sys
 
 global last_len
 
-try:
-    SUPER_TOKEN = os.environ['SUPER_TOKEN']
-except KeyError:
-    print('Please define the environment variable SUPER_TOKEN')
-    sys.exit(1)
-
-MyKey_decrypt = SUPER_TOKEN
-MyKey_encrypt = SUPER_TOKEN
-
-
 def encrypt(key_decrypt, MyKey_encrypt):
     key_encrypt = ""
     for i, j in zip(key_decrypt, MyKey_encrypt):
@@ -116,12 +106,6 @@ class user:
         self.pop3_server = pop3_server
         self.receiver = receiver
 
-
-print("* " * 11)
-print("*   Start running!  *")
-print("* " * 11)
-
-
 def get_config():
     with open("config.txt", 'r', encoding='utf-8') as f:
         f_content = eval(f.readlines()[0])
@@ -145,6 +129,19 @@ def get_config():
     return NEW_user, encrypted
 
 
+try:
+    SUPER_TOKEN = os.environ['SUPER_TOKEN']
+except KeyError:
+    print('Please define the environment variable SUPER_TOKEN')
+    sys.exit(1)
+
+MyKey_decrypt = SUPER_TOKEN
+MyKey_encrypt = SUPER_TOKEN
+
+print("* " * 11)
+print("*   Start running!  *")
+print("* " * 11)
+
 NEW_user, encrypted = get_config()
 
 try:
@@ -163,8 +160,6 @@ try:
             print("Complete initialization of info.txt!")
             quit()
 except:
-    with open("info.txt", 'w', encoding='utf-8') as f:
-        pass
     _msg, last_len = get_msg(NEW_user, 0)
     with open("info.txt", 'w', encoding='utf-8') as f:
         NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -174,7 +169,6 @@ except:
 
 print("The number of messages at last access: " + str(last_len))
 msg, this_len = get_msg(NEW_user, last_len)
-
 
 if not msg:
     print("Nothing happened.\nNo mail is delivered.")
@@ -190,7 +184,7 @@ if not encrypted:
                  'pop3_server': encrypt(NEW_user.pop3_server, MyKey_encrypt),
                  'receiver': encrypt(NEW_user.receiver, MyKey_encrypt),
                  'encrypted': 1}
-    with open('config.txt','w',encoding='utf-8')as f:
+    with open('config.txt', 'w', encoding='utf-8') as f:
         f.write(str(f_content))
 
 print("* " * 11)

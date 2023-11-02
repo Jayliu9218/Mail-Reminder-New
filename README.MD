@@ -4,7 +4,7 @@ date: 2023-10-28 20:57:48
 tags: Python
 ---
 
-
+[TOC]
 
 # 能做什么？
 
@@ -52,7 +52,7 @@ tags: Python
           print('Please define the environment variable GITHUB_TOKEN')
       ```
 
-      在上传 github 仓库时，需要保留密码明文进行初始化操作，此时有一定风险：可以直接获取 TOKEN 进行加密后再上传。
+      在上传 github 仓库时，需要保留密码明文进行初始化操作，此时有一定风险：可以直接获取 TOKEN 使用 `encrypt.py` 加密后再上传。
 
       由于每个人的 TOKEN 不同，可以起到较好的保密效果。
 
