@@ -53,9 +53,7 @@ def mail_deliver(user, Subject_main, Content_main):
         smtpObj.sendmail(user.account, user.receiver, message.as_string())
         smtpObj.quit()
         print("Deliver successfully!\nCheck your mailbox.")
-        with open("info.txt", 'a', encoding='utf-8') as f:
-            NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            f.write(NowTime + ' last_len:' + str(this_len) + '\n')
+
         return True
     except smtplib.SMTPException:
         print("Deliver failed!\nCheck the code.")
@@ -169,6 +167,9 @@ except:
 
 print("The number of messages at last access: " + str(last_len))
 msg, this_len = get_msg(NEW_user, last_len)
+with open("info.txt", 'a', encoding='utf-8') as f:
+    NowTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    f.write(NowTime + ' last_len:' + str(this_len) + '\n')
 
 if not msg:
     print("Nothing happened.\nNo mail is delivered.")
