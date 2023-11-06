@@ -4,7 +4,7 @@ date: 2023-10-28 20:57:48
 tags: Python
 ---
 
-[TOC]
+
 
 # 能做什么？
 
@@ -18,16 +18,39 @@ tags: Python
 # 如何使用？
 
 1. 修改配置文件 `config.txt`：
+
+   ```txt
+   {'account': '%%%@sjtu.edu.cn', 'password': '%%%', 'receiver': '%%%qq.com', 'pop3_server': 'mail.sjtu.edu.cn', 'encrypted': 0}
+   ```
+
    1. `%%%` 替换成自己的；
    2. `encrypted` 的 `0` 表示未加密，不用修改；
    3. `pop3_server` 表示服务器地址，不用修改；
 
-2. 下载 `requirements.txt` 中的依赖项， 运行 `main.py`；
-3. 注意：第一次运行为初始化，获取初始邮件数。
+2. 运行 `encrypt.py` 将 `config.txt` 中的信息进行加密，加密示例：
 
-```txt
-{'account': '%%%@sjtu.edu.cn', 'password': '%%%', 'receiver': '%%%qq.com', 'pop3_server': 'mail.sjtu.edu.cn', 'encrypted': 0}
-```
+   ```txt
+   {'account': '169 200 225 220 200 215 150 226 154 194 187 163 149 118 164 169 229 161 185 238 112 202 182 236 146 171 188 ', 'password': '166 204 215 212 200 195 165 159 104 128 119 ', 'pop3_server': '204 200 209 220 141 213 161 227 165 124 171 206 216 115 207 215 ', 'receiver': '203 160 154 161 151 149 105 162 97 128 134 219 212 115 207 216 223 ', 'encrypted': 1}
+   ```
+
+3. 运行 `main.py` 执行主程序，注意第一次运行为初始化，仅获取初始邮件数；
+
+4. 原则上不要删除邮件，防止出现以下情况：
+
+   ```txt
+   ...
+   时间：2023-11-06 01:35:11；获取到的邮件数：812；
+   ```
+
+   此时删除一定数量的邮件，比如 10 封，邮件数为 802。之后过了一段时间，收到了一封新邮件，邮件数为 803。
+
+   ```txt
+   ...
+   时间：2023-11-06 01:35:11；获取到的邮件数：812；
+   时间：2023-11-06 02:37:35；获取到的邮件数：803；
+   ```
+
+   更新完 `info.txt` 之后程序不会进行提醒，因为发送邮件的触发条件为：此次邮件数大于上次邮件数。
 
 
 
@@ -57,19 +80,19 @@ tags: Python
       由于每个人的 TOKEN 不同，可以起到较好的保密效果。
 
    4. **解决【solved】【2023-11-01】**：在 github repository 中设置 repository secrets，并在 python 程序中设置接口；
-   
+
       ```yaml
       env:
         SUPER_TOKEN: ${{ secrets.SUPER_TOKEN }}
       ```
-   
+
       ```PYTHON
       try:
           SUPER_TOKEN = os.environ['SUPER_TOKEN']
       except KeyError:
           print('Please define the environment variable SUPER_TOKEN')
       ```
-   
+
 2. 实用性：
    1. 问题：只有最新邮件，提醒不到位；
    2. 解决：该程序仅作提醒，若要提醒多封邮件，可以更改 `main.py` 中的转发邮件部分，参照 [编程 | 详解使用Python接收邮件](https://developer.aliyun.com/article/903464#:~:text=%E7%BC%96%E7%A8%8B%20%7C%20%E8%AF%A6%E8%A7%A3%E4%BD%BF%E7%94%A8Python%E6%8E%A5%E6%94%B6%E9%82%AE%E4%BB%B6%201%201.%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4%20%E8%BF%9E%E6%8E%A5%E5%88%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E3%80%82%20%E7%99%BB%E9%99%86%E3%80%82%20%E5%8F%91%E5%87%BA%E6%9C%8D%E5%8A%A1%E8%AF%B7%E6%B1%82%E3%80%82,3.%E8%A7%A3%E6%9E%90%E9%82%AE%E4%BB%B6%E4%B8%BB%E9%A2%98%20...%204%204.%E8%A7%A3%E6%9E%90%E9%82%AE%E4%BB%B6%E6%9D%A5%E6%BA%90%20...%205%205.%E8%A7%A3%E6%9E%90%E9%82%AE%E4%BB%B6%E5%86%85%E5%AE%B9%20)；
@@ -77,6 +100,11 @@ tags: Python
 3. 登录 SJTU 服务器读取邮件没问题，转发邮件失败：
 
    1. 有可能是转发邮件过多导致 QQ 邮件被封...
+
+4. 删除了邮件怎么办：
+
+   1. 手动触发 github actions 的工作流，直接更新邮件数
+
 
 
 
