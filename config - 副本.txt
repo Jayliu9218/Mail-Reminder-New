@@ -1,0 +1,1 @@
+{'account':'Jayliu_sjtu9218@sjtu.edu.cn', 'password':'xxxx', 'pop3_server':'mail.sjtu.edu.cn', 'receiver':'l921832312@qq.com', 'encrypted':0}
